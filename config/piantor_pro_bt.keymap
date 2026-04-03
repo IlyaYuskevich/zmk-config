@@ -3,21 +3,38 @@
  *
  * SPDX-License-Identifier: MIT
  *
- * Piantor Pro BT — Colemak-DH layout
+ * Piantor Pro BT — Colemak-DH layout v3
  *
- * Philosophy:
- *   - Familiar anchor keys: Esc, Tab, Shift, Space, Command, Option stay
- *     roughly where they are on a standard keyboard
- *   - Thumb cluster: Nav(outer-L) | Option(mid-L) | Space/Cmd(inner-L)
- *                    Backspace(inner-R) | Enter(mid-R) | Symbols(outer-R)
- *   - Outer pinky columns: Esc/Tab/Shift on left, '/−/unused on right
- *   - Combined Symbols+Numbers layer optimized for Python/TypeScript
- *   - Nav layer with arrows, page nav, function keys, BT controls
+ * Thumb cluster:
+ *   Left:  [SHIFT] [OPTION] [SPACE/CMD]
+ *   Right: [BSPC]  [ENT/NAV] [SYM]
  *
- * Layer map:
- *   0 - COLEMAK  base layer
- *   1 - SYM      symbols + numbers (hold outer-R thumb)
- *   2 - NAV      navigation + F-keys + BT (hold outer-L thumb)
+ * Home row mods:
+ *   Hold A = Ctrl (left), Hold O = Ctrl (right)
+ *
+ * Outer left pinky column:
+ *   ESC / TAB / '
+ *
+ * Outer right pinky column:
+ *   ! / ? / :   (: via Shift+? = Shift+QMARK... actually COLON key directly)
+ *
+ * Layers:
+ *   0 - COLEMAK   base
+ *   1 - SYM       left=symbols, right=numpad  (hold right outer thumb)
+ *   2 - NAV       navigation + FN + BT        (hold right mid thumb)
+ *
+ * Caps Word: combo Shift + Space
+ *
+ * SYM layer:
+ *   Left hand — symbols (vim-friendly):
+ *     top:  `  !  @  #  ^  &
+ *     home: |  (  [  {  =  _
+ *     bot:  ~  )  ]  }  +  -
+ *
+ *   Right hand — numpad:
+ *     top:  *  7  8  9  0  $
+ *     home: /  4  5  6  "  %
+ *     bot:  \  1  2  3  .  ,
  */
 
 #include <behaviors.dtsi>
@@ -31,42 +48,8 @@
 };
 
 / {
-    macros {
-        // Python/TS: =>
-        arrow_fat: arrow_fat {
-            compatible = "zmk,behavior-macro";
-            #binding-cells = <0>;
-            bindings = <&kp EQUAL &kp GT>;
-            label = "ARROW_FAT";
-        };
-
-        // Python/TS: ->
-        arrow_thin: arrow_thin {
-            compatible = "zmk,behavior-macro";
-            #binding-cells = <0>;
-            bindings = <&kp MINUS &kp GT>;
-            label = "ARROW_THIN";
-        };
-
-        // TS: ?.
-        optional_chain: optional_chain {
-            compatible = "zmk,behavior-macro";
-            #binding-cells = <0>;
-            bindings = <&kp QMARK &kp DOT>;
-            label = "OPTIONAL_CHAIN";
-        };
-
-        // Python/TS: ...
-        ellipsis: ellipsis {
-            compatible = "zmk,behavior-macro";
-            #binding-cells = <0>;
-            bindings = <&kp DOT &kp DOT &kp DOT>;
-            label = "ELLIPSIS";
-        };
-    };
-
     behaviors {
-        // Tap: Space | Hold: Command (GUI)
+        // Tap: Space | Hold: Command
         spc_cmd: spc_cmd {
             compatible = "zmk,behavior-hold-tap";
             label = "SPC_CMD";
@@ -75,6 +58,64 @@
             quick-tap-ms = <200>;
             flavor = "balanced";
             bindings = <&kp>, <&kp>;
+        };
+
+        // Tap: Enter | Hold: NAV layer
+        ent_nav: ent_nav {
+            compatible = "zmk,behavior-hold-tap";
+            label = "ENT_NAV";
+            #binding-cells = <2>;
+            tapping-term-ms = <200>;
+            quick-tap-ms = <150>;
+            flavor = "balanced";
+            bindings = <&mo>, <&kp>;
+        };
+
+        // Hold A = Ctrl — only triggers on right-hand keys
+        ctrl_a: ctrl_a {
+            compatible = "zmk,behavior-hold-tap";
+            label = "CTRL_A";
+            #binding-cells = <2>;
+            tapping-term-ms = <200>;
+            quick-tap-ms = <150>;
+            flavor = "balanced";
+            hold-trigger-key-positions = <
+                6 7 8 9 10 11
+                18 19 20 21 22 23
+                30 31 32 33 34 35
+                39 40 41
+            >;
+            hold-trigger-on-release;
+            bindings = <&kp>, <&kp>;
+        };
+
+        // Hold O = Ctrl — only triggers on left-hand keys
+        ctrl_o: ctrl_o {
+            compatible = "zmk,behavior-hold-tap";
+            label = "CTRL_O";
+            #binding-cells = <2>;
+            tapping-term-ms = <200>;
+            quick-tap-ms = <150>;
+            flavor = "balanced";
+            hold-trigger-key-positions = <
+                0 1 2 3 4 5
+                12 13 14 15 16 17
+                24 25 26 27 28 29
+                36 37 38
+            >;
+            hold-trigger-on-release;
+            bindings = <&kp>, <&kp>;
+        };
+    };
+
+    combos {
+        compatible = "zmk,combos";
+
+        // Caps Word: Shift + Space
+        combo_caps_word {
+            timeout-ms = <50>;
+            key-positions = <36 38>;
+            bindings = <&caps_word>;
         };
     };
 
@@ -85,76 +126,70 @@
         // Layer 0: COLEMAK-DH
         //
         // ┌──────┬──────┬──────┬──────┬──────┬──────┐ ┌──────┬──────┬──────┬──────┬──────┬──────┐
-        // │ ESC  │  Q   │  W   │  F   │  P   │  B   │ │  J   │  L   │  U   │  Y   │  ;   │  '   │
+        // │ ESC  │  Q   │  W   │  F   │  P   │  B   │ │  J   │  L   │  U   │  Y   │  ;   │  !   │
         // ├──────┼──────┼──────┼──────┼──────┼──────┤ ├──────┼──────┼──────┼──────┼──────┼──────┤
-        // │ TAB  │  A   │  R   │  S   │  T   │  G   │ │  M   │  N   │  E   │  I   │  O   │  -   │
+        // │ TAB  │ A/CT │  R   │  S   │  T   │  G   │ │  M   │  N   │  E   │  I   │O/CTL │  ?   │
         // ├──────┼──────┼──────┼──────┼──────┼──────┤ ├──────┼──────┼──────┼──────┼──────┼──────┤
-        // │ SHFT │  Z   │  X   │  C   │  D   │  V   │ │  K   │  H   │  ,   │  .   │  /   │  \   │
+        // │  '   │  Z   │  X   │  C   │  D   │  V   │ │  K   │  H   │  ,   │  .   │  -   │  :   │
         // └──────┴──────┴──────┼──────┼──────┼──────┤ ├──────┼──────┼──────┼──────┴──────┴──────┘
-        //                      │ NAV  │ OPT  │SPC/CM│ │ BSPC │ ENT  │ SYM  │
+        //                      │ SHFT │ OPT  │SPC/CM│ │ BSPC │ENT/NV│ SYM  │
         //                      └──────┴──────┴──────┘ └──────┴──────┴──────┘
         // ─────────────────────────────────────────────────────────────────
         colemak_layer {
             display-name = "COLEMAK";
             bindings = <
-                &kp ESC   &kp Q &kp W &kp F &kp P &kp B    &kp J &kp L &kp U     &kp Y   &kp SEMI &kp SQT
-                &kp TAB   &kp A &kp R &kp S &kp T &kp G    &kp M &kp N &kp E     &kp I   &kp O    &kp MINUS
-                &kp LSHFT &kp Z &kp X &kp C &kp D &kp V    &kp K &kp H &kp COMMA &kp DOT &kp FSLH &kp BSLH
-                          &mo 2  &kp LALT  &spc_cmd LGUI SPACE    &kp BSPC  &kp RET  &mo 1
+                &kp ESC        &kp Q           &kp W &kp F &kp P &kp B    &kp J &kp L &kp U     &kp Y   &kp SEMI        &kp EXCL
+                &kp TAB        &ctrl_a LCTRL A &kp R &kp S &kp T &kp G    &kp M &kp N &kp E     &kp I   &ctrl_o LCTRL O &kp QMARK
+                &kp SQT        &kp Z           &kp X &kp C &kp D &kp V    &kp K &kp H &kp COMMA &kp DOT &kp MINUS       &kp COLON
+                               &kp LSHFT  &kp LALT  &spc_cmd LGUI SPACE   &kp BSPC  &ent_nav 2 RET  &mo 1
             >;
         };
 
         // ─────────────────────────────────────────────────────────────────
-        // Layer 1: SYMBOLS + NUMBERS
-        // Activated by: hold outer-R thumb
-        //
-        // Design goals:
-        //   - Numbers on right home row (easy to remember: 1-5 top, 6-0 home)
-        //   - High-freq symbols on left home row
-        //   - Python/TS macros on left top row
-        //   - Brackets paired logically
+        // Layer 1: SYM — left=symbols, right=numpad
+        // Hold right outer thumb
         //
         // ┌──────┬──────┬──────┬──────┬──────┬──────┐ ┌──────┬──────┬──────┬──────┬──────┬──────┐
-        // │  `   │  =>  │  ->  │  ?.  │  ... │      │ │      │  7   │  8   │  9   │  0   │      │
+        // │      │  `   │  !   │  @   │  #   │  ^   │ │  &   │  *   │  7   │  8   │  9   │  0   │
         // ├──────┼──────┼──────┼──────┼──────┼──────┤ ├──────┼──────┼──────┼──────┼──────┼──────┤
-        // │      │  !   │  @   │  #   │  $   │  %   │ │  ^   │  4   │  5   │  6   │  *   │  =   │
+        // │  "   │  |   │  (   │  [   │  {   │  =   │ │  _   │  /   │  4   │  5   │  6   │  $   │
         // ├──────┼──────┼──────┼──────┼──────┼──────┤ ├──────┼──────┼──────┼──────┼──────┼──────┤
-        // │      │  (   │  )   │  [   │  ]   │  {   │ │  }   │  1   │  2   │  3   │  +   │  &   │
+        // │      │  ~   │  )   │  ]   │  }   │  +   │ │  -   │  \   │  1   │  2   │  3   │  %   │
         // └──────┴──────┴──────┼──────┼──────┼──────┤ ├──────┼──────┼──────┼──────┴──────┴──────┘
-        //                      │      │  |   │  _   │ │  DEL │      │ [HLD]│
+        //                      │      │      │      │ │ DEL  │      │[HLD] │
         //                      └──────┴──────┴──────┘ └──────┴──────┴──────┘
         // ─────────────────────────────────────────────────────────────────
         sym_layer {
             display-name = "SYM";
             bindings = <
-                &kp GRAVE &arrow_fat    &arrow_thin   &optional_chain &ellipsis &trans       &trans    &kp N7 &kp N8 &kp N9 &kp N0    &trans
-                &trans    &kp EXCL      &kp AT        &kp HASH        &kp DLLR  &kp PRCNT    &kp CARET &kp N4 &kp N5 &kp N6 &kp ASTRK &kp EQUAL
-                &trans    &kp LPAR      &kp RPAR      &kp LBKT        &kp RBKT  &kp LBRC     &kp RBRC  &kp N1 &kp N2 &kp N3 &kp PLUS  &kp AMPS
-                                        &trans        &kp PIPE        &kp UNDER              &kp DEL   &trans &trans
+                &trans    &kp GRAVE &kp EXCL  &kp AT   &kp HASH &kp CARET    &kp AMPS  &kp ASTRK &kp N7 &kp N8 &kp N9  &kp N0
+                &kp DQT   &kp PIPE  &kp LPAR  &kp LBKT &kp LBRC &kp EQUAL    &kp UNDER &kp FSLH  &kp N4 &kp N5 &kp N6  &kp DLLR
+                &trans    &kp TILDE &kp RPAR  &kp RBKT &kp RBRC &kp PLUS     &kp MINUS &kp BSLH  &kp N1 &kp N2 &kp N3  &kp PRCNT
+                                    &trans    &trans   &trans                 &kp DEL   &trans    &trans
             >;
         };
 
         // ─────────────────────────────────────────────────────────────────
         // Layer 2: NAV + FUNCTION + BT
-        // Activated by: hold outer-L thumb
+        // Tap Enter / Hold to activate (right mid thumb)
         //
         // ┌──────┬──────┬──────┬──────┬──────┬──────┐ ┌──────┬──────┬──────┬──────┬──────┬──────┐
         // │      │  F1  │  F2  │  F3  │  F4  │  F5  │ │  F6  │  F7  │  F8  │  F9  │ F10  │ F11  │
         // ├──────┼──────┼──────┼──────┼──────┼──────┤ ├──────┼──────┼──────┼──────┼──────┼──────┤
         // │      │ BT0  │ BT1  │ BT2  │ BT3  │ BT4  │ │ LEFT │ DOWN │  UP  │ RGHT │ HOME │  END │
         // ├──────┼──────┼──────┼──────┼──────┼──────┤ ├──────┼──────┼──────┼──────┼──────┼──────┤
-        // │      │BTCLR │      │      │      │      │ │ PGDN │ PGUP │      │      │      │ F12  │
+        // │      │BTCLR │      │      │ RST  │ BOOT │ │ PGDN │ PGUP │      │      │      │ F12  │
         // └──────┴──────┴──────┼──────┼──────┼──────┤ ├──────┼──────┼──────┼──────┴──────┴──────┘
-        //                      │ [HLD]│      │      │ │      │      │      │
+        //                      │      │      │      │ │      │[HLD] │      │
         //                      └──────┴──────┴──────┘ └──────┴──────┴──────┘
         // ─────────────────────────────────────────────────────────────────
         nav_layer {
             display-name = "NAV";
             bindings = <
-                &trans &kp F1       &kp F2 &kp F3 &kp F4 &kp F5    &kp F6   &kp F7   &kp F8 &kp F9    &kp F10  &kp F11
-                &trans &bt BT_SEL 0 &bt BT_SEL 1 &bt BT_SEL 2 &bt BT_SEL 3 &bt BT_SEL 4    &kp LEFT &kp DOWN &kp UP &kp RIGHT &kp HOME &kp END
-                &trans &bt BT_CLR   &trans &trans &trans &trans    &kp PG_DN &kp PG_UP &trans &trans    &trans   &kp F12
-                       &trans       &trans &trans                  &trans    &trans    &trans
+                &trans &kp F1       &kp F2       &kp F3       &kp F4     &kp F5         &kp F6    &kp F7    &kp F8 &kp F9    &kp F10  &kp F11
+                &trans &bt BT_SEL 0 &bt BT_SEL 1 &bt BT_SEL 2 &bt BT_SEL 3 &bt BT_SEL 4   &kp LEFT  &kp DOWN  &kp UP &kp RIGHT &kp HOME &kp END
+                &trans &bt BT_CLR   &trans       &trans       &sys_reset &bootloader    &kp PG_DN &kp PG_UP &trans &trans    &trans   &kp F12
+                       &trans       &trans       &trans                                 &trans    &trans    &trans
             >;
         };
     };
