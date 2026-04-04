@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: MIT
  *
- * Piantor Pro BT — Colemak-DH layout v3
+ * Piantor Pro BT — Colemak-DH layout v9
  *
  * Thumb cluster:
  *   Left:  [SHIFT] [OPTION] [SPACE/CMD]
@@ -13,10 +13,22 @@
  *   Hold A = Ctrl (left), Hold O = Ctrl (right)
  *
  * Outer left pinky column:
- *   ESC / TAB / '
+ *   ESC / TAB / !?
  *
- * Outer right pinky column:
- *   ! / ? / :   (: via Shift+? = Shift+QMARK... actually COLON key directly)
+ * Right pinky column (standard Colemak-DH positions):
+ *   :;  (colon primary — frequency swap via mod-morph)
+ *   O
+ *   /~  (tilde shifted — path-friendly pair via mod-morph)
+ *
+ * Right outer pinky column:
+ *   \|  (standard shifted pair)
+ *   '"  (standard shifted pair)
+ *   -_  (standard shifted pair)
+ *
+ * Mod-morphs:
+ *   colon_semi : unshifted, ; shifted
+ *   slash_tilde / unshifted, ~ shifted
+ *   excl_ques  ! unshifted, ? shifted
  *
  * Layers:
  *   0 - COLEMAK   base
@@ -26,15 +38,15 @@
  * Caps Word: combo Shift + Space
  *
  * SYM layer:
- *   Left hand — symbols (vim-friendly):
- *     top:  `  !  @  #  ^  &
- *     home: |  (  [  {  =  _
- *     bot:  ~  )  ]  }  +  -
+ *   Left hand — symbols:
+ *     top:      `  !  @  #  ^  &
+ *     home: "   |  (  [  {  =
+ *     bot:  :   ~  )  ]  }  +
  *
  *   Right hand — numpad:
  *     top:  *  7  8  9  0  $
- *     home: /  4  5  6  "  %
- *     bot:  \  1  2  3  .  ,
+ *     home: /  4  5  6     _
+ *     bot:  \  1  2  3     %
  */
 
 #include <behaviors.dtsi>
@@ -106,6 +118,33 @@
             hold-trigger-on-release;
             bindings = <&kp>, <&kp>;
         };
+
+        // : unshifted, ; shifted
+        colon_semi: colon_semi {
+            compatible = "zmk,behavior-mod-morph";
+            label = "COLON_SEMI";
+            #binding-cells = <0>;
+            bindings = <&kp COLON>, <&kp SEMI>;
+            mods = <(MOD_LSFT|MOD_RSFT)>;
+        };
+
+        // / unshifted, ~ shifted
+        slash_tilde: slash_tilde {
+            compatible = "zmk,behavior-mod-morph";
+            label = "SLASH_TILDE";
+            #binding-cells = <0>;
+            bindings = <&kp FSLH>, <&kp TILDE>;
+            mods = <(MOD_LSFT|MOD_RSFT)>;
+        };
+
+        // ! unshifted, ? shifted
+        excl_ques: excl_ques {
+            compatible = "zmk,behavior-mod-morph";
+            label = "EXCL_QUES";
+            #binding-cells = <0>;
+            bindings = <&kp EXCL>, <&kp QMARK>;
+            mods = <(MOD_LSFT|MOD_RSFT)>;
+        };
     };
 
     combos {
@@ -126,11 +165,11 @@
         // Layer 0: COLEMAK-DH
         //
         // ┌──────┬──────┬──────┬──────┬──────┬──────┐ ┌──────┬──────┬──────┬──────┬──────┬──────┐
-        // │ ESC  │  Q   │  W   │  F   │  P   │  B   │ │  J   │  L   │  U   │  Y   │  ;   │  !   │
+        // │ ESC  │  Q   │  W   │  F   │  P   │  B   │ │  J   │  L   │  U   │  Y   │  :;  │  \|  │
         // ├──────┼──────┼──────┼──────┼──────┼──────┤ ├──────┼──────┼──────┼──────┼──────┼──────┤
-        // │ TAB  │ A/CT │  R   │  S   │  T   │  G   │ │  M   │  N   │  E   │  I   │O/CTL │  ?   │
+        // │ TAB  │ A/CT │  R   │  S   │  T   │  G   │ │  M   │  N   │  E   │  I   │O/CTL │  '"  │
         // ├──────┼──────┼──────┼──────┼──────┼──────┤ ├──────┼──────┼──────┼──────┼──────┼──────┤
-        // │  '   │  Z   │  X   │  C   │  D   │  V   │ │  K   │  H   │  ,   │  .   │  -   │  :   │
+        // │  !?  │  Z   │  X   │  C   │  D   │  V   │ │  K   │  H   │  ,   │  .   │  /~  │  -_  │
         // └──────┴──────┴──────┼──────┼──────┼──────┤ ├──────┼──────┼──────┼──────┴──────┴──────┘
         //                      │ SHFT │ OPT  │SPC/CM│ │ BSPC │ENT/NV│ SYM  │
         //                      └──────┴──────┴──────┘ └──────┴──────┴──────┘
@@ -138,9 +177,9 @@
         colemak_layer {
             display-name = "COLEMAK";
             bindings = <
-                &kp ESC        &kp Q           &kp W &kp F &kp P &kp B    &kp J &kp L &kp U     &kp Y   &kp SEMI        &kp EXCL
-                &kp TAB        &ctrl_a LCTRL A &kp R &kp S &kp T &kp G    &kp M &kp N &kp E     &kp I   &ctrl_o LCTRL O &kp QMARK
-                &kp SQT        &kp Z           &kp X &kp C &kp D &kp V    &kp K &kp H &kp COMMA &kp DOT &kp MINUS       &kp COLON
+                &kp ESC        &kp Q           &kp W &kp F &kp P &kp B    &kp J &kp L &kp U     &kp Y   &colon_semi      &kp BSLH
+                &kp TAB        &ctrl_a LCTRL A &kp R &kp S &kp T &kp G    &kp M &kp N &kp E     &kp I   &ctrl_o LCTRL O  &kp SQT
+                &excl_ques     &kp Z           &kp X &kp C &kp D &kp V    &kp K &kp H &kp COMMA &kp DOT &slash_tilde      &kp MINUS
                                &kp LSHFT  &kp LALT  &spc_cmd LGUI SPACE   &kp BSPC  &ent_nav 2 RET  &mo 1
             >;
         };
@@ -154,7 +193,7 @@
         // ├──────┼──────┼──────┼──────┼──────┼──────┤ ├──────┼──────┼──────┼──────┼──────┼──────┤
         // │  "   │  |   │  (   │  [   │  {   │  =   │ │  _   │  /   │  4   │  5   │  6   │  $   │
         // ├──────┼──────┼──────┼──────┼──────┼──────┤ ├──────┼──────┼──────┼──────┼──────┼──────┤
-        // │      │  ~   │  )   │  ]   │  }   │  +   │ │  -   │  \   │  1   │  2   │  3   │  %   │
+        // │  :   │  ~   │  )   │  ]   │  }   │  +   │ │  -   │  \   │  1   │  2   │  3   │  %   │
         // └──────┴──────┴──────┼──────┼──────┼──────┤ ├──────┼──────┼──────┼──────┴──────┴──────┘
         //                      │      │      │      │ │ DEL  │      │[HLD] │
         //                      └──────┴──────┴──────┘ └──────┴──────┴──────┘
@@ -162,10 +201,10 @@
         sym_layer {
             display-name = "SYM";
             bindings = <
-                &trans    &kp GRAVE &kp EXCL  &kp AT   &kp HASH &kp CARET    &kp AMPS  &kp ASTRK &kp N7 &kp N8 &kp N9  &kp N0
-                &kp DQT   &kp PIPE  &kp LPAR  &kp LBKT &kp LBRC &kp EQUAL    &kp UNDER &kp FSLH  &kp N4 &kp N5 &kp N6  &kp DLLR
-                &trans    &kp TILDE &kp RPAR  &kp RBKT &kp RBRC &kp PLUS     &kp MINUS &kp BSLH  &kp N1 &kp N2 &kp N3  &kp PRCNT
-                                    &trans    &trans   &trans                 &kp DEL   &trans    &trans
+                &trans    &kp GRAVE &kp EXCL &kp AT   &kp HASH &kp CARET    &kp AMPS  &kp ASTRK &kp N7 &kp N8 &kp N9  &kp N0
+                &kp DQT   &kp PIPE  &kp LPAR &kp LBKT &kp LBRC &kp EQUAL    &kp UNDER &kp FSLH  &kp N4 &kp N5 &kp N6  &kp DLLR
+                &kp COLON &kp TILDE &kp RPAR &kp RBKT &kp RBRC &kp PLUS     &kp MINUS &kp BSLH  &kp N1 &kp N2 &kp N3  &kp PRCNT
+                                    &trans   &trans   &trans                 &kp DEL   &trans    &trans
             >;
         };
 
@@ -186,10 +225,10 @@
         nav_layer {
             display-name = "NAV";
             bindings = <
-                &trans &kp F1       &kp F2       &kp F3       &kp F4     &kp F5         &kp F6    &kp F7    &kp F8 &kp F9    &kp F10  &kp F11
-                &trans &bt BT_SEL 0 &bt BT_SEL 1 &bt BT_SEL 2 &bt BT_SEL 3 &bt BT_SEL 4   &kp LEFT  &kp DOWN  &kp UP &kp RIGHT &kp HOME &kp END
-                &trans &bt BT_CLR   &trans       &trans       &sys_reset &bootloader    &kp PG_DN &kp PG_UP &trans &trans    &trans   &kp F12
-                       &trans       &trans       &trans                                 &trans    &trans    &trans
+                &trans &kp F1       &kp F2       &kp F3       &kp F4     &kp F5          &kp F6    &kp F7    &kp F8 &kp F9    &kp F10  &kp F11
+                &trans &bt BT_SEL 0 &bt BT_SEL 1 &bt BT_SEL 2 &bt BT_SEL 3 &bt BT_SEL 4    &kp LEFT  &kp DOWN  &kp UP &kp RIGHT &kp HOME &kp END
+                &trans &bt BT_CLR   &trans       &trans       &sys_reset &bootloader     &kp PG_DN &kp PG_UP &trans &trans    &trans   &kp F12
+                       &trans       &trans       &trans                                  &trans    &trans    &trans
             >;
         };
     };
