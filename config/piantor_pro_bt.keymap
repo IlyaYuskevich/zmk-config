@@ -3,50 +3,43 @@
  *
  * SPDX-License-Identifier: MIT
  *
- * Piantor Pro BT — Colemak-DH layout v9
+ * Piantor Pro BT — Colemak-DH layout v11
+ *
+ * Changes from v10:
+ *   SYM layer rework — clean dupes, add ligature macros and prose marks:
+ *
+ *     Left hand:
+ *       col 0 (outer): —  =>  …      (em-dash / fat-arrow / ellipsis)
+ *       col 1:         |  <  >       (| top, < and > paired below)
+ *       col 2:         `  (  )       (grave moved here from col 1 top)
+ *       col 3-5:       @ [ ] / # { } / ^ = +   (unchanged)
+ *
+ *     Right hand (numpad columns 8-10 preserved):
+ *       col 6:  &  ==  !=     (equality column)
+ *       col 7:  *  $   %      (currency column)
+ *       col 8-10: 7 8 9 / 4 5 6 / 1 2 3  (numpad)
+ *       col 11: 0  <=  >=     (comparison on outer pinky)
+ *
+ *   Em-dash and ellipsis assume Mac keyboard (Opt+Shift+-, Opt+;).
  *
  * Thumb cluster:
- *   Left:  [SHIFT] [OPTION] [SPACE/CMD]
- *   Right: [BSPC]  [ENT/NAV] [SYM]
+ *   Left:  ESC|SHIFT  ·  BSPC|OPT  ·  SPC|CMD
+ *   Right: ENT        ·  TAB|NAV   ·  SYM
  *
  * Home row mods:
  *   Hold A = Ctrl (left), Hold O = Ctrl (right)
  *
- * Outer left pinky column:
- *   ESC / TAB / !?
- *
- * Right pinky column (standard Colemak-DH positions):
- *   :;  (colon primary — frequency swap via mod-morph)
- *   O
- *   /~  (tilde shifted — path-friendly pair via mod-morph)
- *
- * Right outer pinky column:
- *   \|  (standard shifted pair)
- *   '"  (standard shifted pair)
- *   -_  (standard shifted pair)
- *
- * Mod-morphs:
- *   colon_semi : unshifted, ; shifted
- *   slash_tilde / unshifted, ~ shifted
- *   excl_ques  ! unshifted, ? shifted
+ * Base layer pinky columns:
+ *   Left outer:  '"  / ?  / !
+ *   Right inner: :;  / O  / /~    (colon_semi and slash_tilde mod-morphs)
+ *   Right outer: \|  / -  / _
  *
  * Layers:
  *   0 - COLEMAK   base
- *   1 - SYM       left=symbols, right=numpad  (hold right outer thumb)
- *   2 - NAV       navigation + FN + BT        (hold right mid thumb)
+ *   1 - SYM       left=symbols+prose, right=numpad+ligatures (hold right outer)
+ *   2 - NAV       navigation + FN + BT                       (hold right mid)
  *
- * Caps Word: combo Shift + Space
- *
- * SYM layer:
- *   Left hand — symbols:
- *     top:      `  !  @  #  ^  &
- *     home: "   |  (  [  {  =
- *     bot:  :   ~  )  ]  }  +
- *
- *   Right hand — numpad:
- *     top:  *  7  8  9  0  $
- *     home: /  4  5  6     _
- *     bot:  \  1  2  3     %
+ * Caps Word: combo left-outer-thumb (ESC tap) + left-inner-thumb (SPACE tap)
  */
 
 #include <behaviors.dtsi>
@@ -60,6 +53,77 @@
 };
 
 / {
+    macros {
+        // =>  JS/TS arrow, Rust match arm
+        m_fatarrow: m_fatarrow {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&macro_tap &kp EQUAL &kp GT>;
+            wait-ms = <30>;
+            tap-ms = <30>;
+        };
+
+        // ==  equality
+        m_eq: m_eq {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&macro_tap &kp EQUAL &kp EQUAL>;
+            wait-ms = <30>;
+            tap-ms = <30>;
+        };
+
+        // !=  inequality
+        m_neq: m_neq {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&macro_tap &kp EXCL &kp EQUAL>;
+            wait-ms = <30>;
+            tap-ms = <30>;
+        };
+
+        // <=  less-or-equal
+        m_lte: m_lte {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&macro_tap &kp LT &kp EQUAL>;
+            wait-ms = <30>;
+            tap-ms = <30>;
+        };
+
+        // >=  greater-or-equal
+        m_gte: m_gte {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&macro_tap &kp GT &kp EQUAL>;
+            wait-ms = <30>;
+            tap-ms = <30>;
+        };
+
+        // —  em-dash (Mac: Opt+Shift+-)
+        m_emdash: m_emdash {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&macro_press &kp LALT>,
+                       <&macro_press &kp LSHFT>,
+                       <&macro_tap &kp MINUS>,
+                       <&macro_release &kp LSHFT>,
+                       <&macro_release &kp LALT>;
+            wait-ms = <30>;
+            tap-ms = <30>;
+        };
+
+        // …  ellipsis (Mac: Opt+;)
+        m_ellipsis: m_ellipsis {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&macro_press &kp LALT>,
+                       <&macro_tap &kp SEMI>,
+                       <&macro_release &kp LALT>;
+            wait-ms = <30>;
+            tap-ms = <30>;
+        };
+    };
+
     behaviors {
         // Tap: Space | Hold: Command
         spc_cmd: spc_cmd {
@@ -72,10 +136,32 @@
             bindings = <&kp>, <&kp>;
         };
 
-        // Tap: Enter | Hold: NAV layer
-        ent_nav: ent_nav {
+        // Tap: Escape | Hold: Shift
+        esc_shft: esc_shft {
             compatible = "zmk,behavior-hold-tap";
-            label = "ENT_NAV";
+            label = "ESC_SHFT";
+            #binding-cells = <2>;
+            tapping-term-ms = <200>;
+            quick-tap-ms = <200>;
+            flavor = "balanced";
+            bindings = <&kp>, <&kp>;
+        };
+
+        // Tap: Backspace | Hold: Option/Alt
+        bspc_opt: bspc_opt {
+            compatible = "zmk,behavior-hold-tap";
+            label = "BSPC_OPT";
+            #binding-cells = <2>;
+            tapping-term-ms = <200>;
+            quick-tap-ms = <200>;
+            flavor = "balanced";
+            bindings = <&kp>, <&kp>;
+        };
+
+        // Tap: Tab | Hold: NAV layer
+        tab_nav: tab_nav {
+            compatible = "zmk,behavior-hold-tap";
+            label = "TAB_NAV";
             #binding-cells = <2>;
             tapping-term-ms = <200>;
             quick-tap-ms = <150>;
@@ -136,21 +222,12 @@
             bindings = <&kp FSLH>, <&kp TILDE>;
             mods = <(MOD_LSFT|MOD_RSFT)>;
         };
-
-        // ! unshifted, ? shifted
-        excl_ques: excl_ques {
-            compatible = "zmk,behavior-mod-morph";
-            label = "EXCL_QUES";
-            #binding-cells = <0>;
-            bindings = <&kp EXCL>, <&kp QMARK>;
-            mods = <(MOD_LSFT|MOD_RSFT)>;
-        };
     };
 
     combos {
         compatible = "zmk,combos";
 
-        // Caps Word: Shift + Space
+        // Caps Word: left-outer-thumb (esc_shft) + left-inner-thumb (spc_cmd)
         combo_caps_word {
             timeout-ms = <50>;
             key-positions = <36 38>;
@@ -165,70 +242,70 @@
         // Layer 0: COLEMAK-DH
         //
         // ┌──────┬──────┬──────┬──────┬──────┬──────┐ ┌──────┬──────┬──────┬──────┬──────┬──────┐
-        // │ ESC  │  Q   │  W   │  F   │  P   │  B   │ │  J   │  L   │  U   │  Y   │  :;  │  \|  │
+        // │  '"  │  Q   │  W   │  F   │  P   │  B   │ │  J   │  L   │  U   │  Y   │  :;  │  \|  │
         // ├──────┼──────┼──────┼──────┼──────┼──────┤ ├──────┼──────┼──────┼──────┼──────┼──────┤
-        // │ TAB  │ A/CT │  R   │  S   │  T   │  G   │ │  M   │  N   │  E   │  I   │O/CTL │  '"  │
+        // │  ?   │ A/CT │  R   │  S   │  T   │  G   │ │  M   │  N   │  E   │  I   │O/CTL │  -   │
         // ├──────┼──────┼──────┼──────┼──────┼──────┤ ├──────┼──────┼──────┼──────┼──────┼──────┤
-        // │  !?  │  Z   │  X   │  C   │  D   │  V   │ │  K   │  H   │  ,   │  .   │  /~  │  -_  │
+        // │  !   │  Z   │  X   │  C   │  D   │  V   │ │  K   │  H   │  ,   │  .   │  /~  │  _   │
         // └──────┴──────┴──────┼──────┼──────┼──────┤ ├──────┼──────┼──────┼──────┴──────┴──────┘
-        //                      │ SHFT │ OPT  │SPC/CM│ │ BSPC │ENT/NV│ SYM  │
+        //                      │ESC/SH│BSPC/O│SPC/CM│ │ ENT  │TAB/NV│ SYM  │
         //                      └──────┴──────┴──────┘ └──────┴──────┴──────┘
         // ─────────────────────────────────────────────────────────────────
         colemak_layer {
             display-name = "COLEMAK";
             bindings = <
-                &kp ESC        &kp Q           &kp W &kp F &kp P &kp B    &kp J &kp L &kp U     &kp Y   &colon_semi      &kp BSLH
-                &kp TAB        &ctrl_a LCTRL A &kp R &kp S &kp T &kp G    &kp M &kp N &kp E     &kp I   &ctrl_o LCTRL O  &kp SQT
-                &excl_ques     &kp Z           &kp X &kp C &kp D &kp V    &kp K &kp H &kp COMMA &kp DOT &slash_tilde      &kp MINUS
-                               &kp LSHFT  &kp LALT  &spc_cmd LGUI SPACE   &kp BSPC  &ent_nav 2 RET  &mo 1
+                &kp SQT        &kp Q           &kp W &kp F &kp P &kp B    &kp J &kp L &kp U     &kp Y   &colon_semi      &kp BSLH
+                &kp QMARK      &ctrl_a LCTRL A &kp R &kp S &kp T &kp G    &kp M &kp N &kp E     &kp I   &ctrl_o LCTRL O  &kp MINUS
+                &kp EXCL       &kp Z           &kp X &kp C &kp D &kp V    &kp K &kp H &kp COMMA &kp DOT &slash_tilde     &kp UNDER
+                     &esc_shft LSHFT ESC   &bspc_opt LALT BSPC   &spc_cmd LGUI SPACE      &kp RET   &tab_nav 2 TAB   &mo 1
             >;
         };
 
         // ─────────────────────────────────────────────────────────────────
-        // Layer 1: SYM — left=symbols, right=numpad
-        // Hold right outer thumb
+        // Layer 1: SYM — left=symbols+prose, right=numpad+ligatures
+        // Hold right outer thumb (SYM key)
         //
         // ┌──────┬──────┬──────┬──────┬──────┬──────┐ ┌──────┬──────┬──────┬──────┬──────┬──────┐
-        // │      │  `   │  !   │  @   │  #   │  ^   │ │  &   │  *   │  7   │  8   │  9   │  0   │
+        // │  —   │  |   │  `   │  @   │  #   │  ^   │ │  &   │  *   │  7   │  8   │  9   │  0   │
         // ├──────┼──────┼──────┼──────┼──────┼──────┤ ├──────┼──────┼──────┼──────┼──────┼──────┤
-        // │  "   │  |   │  (   │  [   │  {   │  =   │ │  _   │  /   │  4   │  5   │  6   │  $   │
+        // │  =>  │  <   │  (   │  [   │  {   │  =   │ │  ==  │  $   │  4   │  5   │  6   │  <=  │
         // ├──────┼──────┼──────┼──────┼──────┼──────┤ ├──────┼──────┼──────┼──────┼──────┼──────┤
-        // │  :   │  ~   │  )   │  ]   │  }   │  +   │ │  -   │  \   │  1   │  2   │  3   │  %   │
+        // │  …   │  >   │  )   │  ]   │  }   │  +   │ │  !=  │  %   │  1   │  2   │  3   │  >=  │
         // └──────┴──────┴──────┼──────┼──────┼──────┤ ├──────┼──────┼──────┼──────┴──────┴──────┘
-        //                      │      │      │      │ │ DEL  │      │[HLD] │
+        //                      │      │ DEL  │      │ │      │      │[HLD] │
         //                      └──────┴──────┴──────┘ └──────┴──────┴──────┘
         // ─────────────────────────────────────────────────────────────────
         sym_layer {
             display-name = "SYM";
             bindings = <
-                &trans    &kp GRAVE &kp EXCL &kp AT   &kp HASH &kp CARET    &kp AMPS  &kp ASTRK &kp N7 &kp N8 &kp N9  &kp N0
-                &kp DQT   &kp PIPE  &kp LPAR &kp LBKT &kp LBRC &kp EQUAL    &kp UNDER &kp FSLH  &kp N4 &kp N5 &kp N6  &kp DLLR
-                &kp COLON &kp TILDE &kp RPAR &kp RBKT &kp RBRC &kp PLUS     &kp MINUS &kp BSLH  &kp N1 &kp N2 &kp N3  &kp PRCNT
-                                    &trans   &trans   &trans                 &kp DEL   &trans    &trans
+                &m_emdash    &kp PIPE  &kp GRAVE &kp AT   &kp HASH &kp CARET    &kp AMPS    &kp ASTRK &kp N7 &kp N8 &kp N9 &kp N0
+                &m_fatarrow  &kp LT    &kp LPAR  &kp LBKT &kp LBRC &kp EQUAL    &m_eq       &kp DLLR  &kp N4 &kp N5 &kp N6 &m_lte
+                &m_ellipsis  &kp GT    &kp RPAR  &kp RBKT &kp RBRC &kp PLUS     &m_neq      &kp PRCNT &kp N1 &kp N2 &kp N3 &m_gte
+                                       &trans    &kp DEL  &trans                 &trans      &trans    &trans
             >;
         };
 
         // ─────────────────────────────────────────────────────────────────
         // Layer 2: NAV + FUNCTION + BT
-        // Tap Enter / Hold to activate (right mid thumb)
+        // Hold right mid thumb (TAB|NAV)
         //
         // ┌──────┬──────┬──────┬──────┬──────┬──────┐ ┌──────┬──────┬──────┬──────┬──────┬──────┐
         // │      │  F1  │  F2  │  F3  │  F4  │  F5  │ │  F6  │  F7  │  F8  │  F9  │ F10  │ F11  │
         // ├──────┼──────┼──────┼──────┼──────┼──────┤ ├──────┼──────┼──────┼──────┼──────┼──────┤
-        // │      │ BT0  │ BT1  │ BT2  │ BT3  │ BT4  │ │ LEFT │ DOWN │  UP  │ RGHT │ HOME │  END │
+        // │      │ BT0  │ BT1  │ BT2  │ BT3  │ BT4  │ │ LEFT │ DOWN │  UP  │ RGHT │ HOME │ END  │
         // ├──────┼──────┼──────┼──────┼──────┼──────┤ ├──────┼──────┼──────┼──────┼──────┼──────┤
         // │      │BTCLR │      │      │ RST  │ BOOT │ │ PGDN │ PGUP │      │      │      │ F12  │
         // └──────┴──────┴──────┼──────┼──────┼──────┤ ├──────┼──────┼──────┼──────┴──────┴──────┘
-        //                      │      │      │      │ │      │[HLD] │      │
+        //                      │      │      │      │ │      │      │[HLD] │
         //                      └──────┴──────┴──────┘ └──────┴──────┴──────┘
         // ─────────────────────────────────────────────────────────────────
         nav_layer {
             display-name = "NAV";
             bindings = <
-                &trans &kp F1       &kp F2       &kp F3       &kp F4     &kp F5          &kp F6    &kp F7    &kp F8 &kp F9    &kp F10  &kp F11
+                &trans &kp F1       &kp F2       &kp F3       &kp F4       &kp F5          &kp F6    &kp F7    &kp F8 &kp F9    &kp F10  &kp F11
                 &trans &bt BT_SEL 0 &bt BT_SEL 1 &bt BT_SEL 2 &bt BT_SEL 3 &bt BT_SEL 4    &kp LEFT  &kp DOWN  &kp UP &kp RIGHT &kp HOME &kp END
-                &trans &bt BT_CLR   &trans       &trans       &sys_reset &bootloader     &kp PG_DN &kp PG_UP &trans &trans    &trans   &kp F12
-                       &trans       &trans       &trans                                  &trans    &trans    &trans
+                &trans &bt BT_CLR   &trans       &trans       &sys_reset   &bootloader     &kp PG_DN &kp PG_UP &trans &trans    &trans   &kp F12
+                                    &trans       &trans       &trans                       &trans    &trans    &trans
             >;
         };
     };
